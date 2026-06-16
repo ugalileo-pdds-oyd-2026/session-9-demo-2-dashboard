@@ -66,6 +66,19 @@ resource "aws_cloudwatch_metric_alarm" "latency" {
   }
 }
 
+# Billing metrics only exist in us-east-1; CloudWatch rejects SNS topic ARNs from other regions.
+resource "aws_sns_topic" "billing_alarms" {
+  provider = aws.us_east_1
+  name     = "${var.environment}-${var.app_name}-billing-alarms"
+}
+
+resource "aws_sns_topic_subscription" "billing_email" {
+  provider  = aws.us_east_1
+  topic_arn = aws_sns_topic.billing_alarms.arn
+  protocol  = "email"
+  endpoint  = var.notification_email
+}
+
 resource "aws_cloudwatch_metric_alarm" "estimated_charges" {
   provider = aws.us_east_1
 
@@ -78,7 +91,8 @@ resource "aws_cloudwatch_metric_alarm" "estimated_charges" {
   statistic           = "Maximum"
   threshold           = var.estimated_charges_threshold
   alarm_description   = "Estimated AWS charges exceeded $${var.estimated_charges_threshold} USD"
-  alarm_actions       = [aws_sns_topic.alarms.arn]
+  alarm_actions       = [aws_sns_topic.billing_alarms.arn]
+  ok_actions          = [aws_sns_topic.billing_alarms.arn]
   treat_missing_data  = "notBreaching"
 
   dimensions = {
