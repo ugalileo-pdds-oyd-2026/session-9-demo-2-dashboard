@@ -100,6 +100,11 @@ resource "aws_ecs_task_definition" "app" {
   task_role_arn            = var.task_role_arn
   execution_role_arn       = var.task_role_arn
 
+  runtime_platform {
+    cpu_architecture        = "ARM64"
+    operating_system_family = "LINUX"
+  }
+
   container_definitions = jsonencode([{
     name      = var.app_name
     image     = var.container_image

@@ -46,5 +46,5 @@ module "compute" {
   task_memory     = var.task_memory
   desired_count   = var.desired_count
   task_role_arn   = module.secrets.task_role_arn
-  log_group_name  = module.observability.log_group_name
+  log_group_name  = "/app/${var.environment}/${var.app_name}"
 }
