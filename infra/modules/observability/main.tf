@@ -115,3 +115,61 @@ resource "aws_budgets_budget" "monthly" {
     subscriber_sns_topic_arns = [aws_sns_topic.alarms.arn]
   }
 }
+
+resource "aws_cloudwatch_dashboard" "main" {
+  dashboard_name = "${var.environment}-${var.app_name}"
+
+  dashboard_body = jsonencode({
+    widgets = [
+      {
+        type   = "metric"
+        x      = 0
+        y      = 0
+        width  = 8
+        height = 6
+        properties = {
+          title   = "Request Count"
+          view    = "timeSeries"
+          stacked = false
+          metrics = [
+            ["AWS/ApplicationELB", "RequestCount",
+              "LoadBalancer", var.alb_arn_suffix,
+              { stat = "Sum", period = 60 }]
+          ]
+          region = var.aws_region
+        }
+      },
+      {
+        type   = "metric"
+        x      = 8
+        y      = 0
+        width  = 8
+        height = 6
+        properties = {
+          title   = "HTTP 5xx Errors"
+          view    = "timeSeries"
+          stacked = false
+          metrics = [
+            ["AWS/ApplicationELB", "HTTPCode_Target_5XX_Count",
+              "LoadBalancer", var.alb_arn_suffix,
+              { stat = "Sum", period = 60, color = "#d62728" }]
+          ]
+          region = var.aws_region
+        }
+      },
+      {
+        type   = "alarm"
+        x      = 16
+        y      = 0
+        width  = 8
+        height = 6
+        properties = {
+          title = "Cost Alert Status"
+          alarms = [
+            aws_cloudwatch_metric_alarm.estimated_charges.arn
+          ]
+        }
+      }
+    ]
+  })
+}

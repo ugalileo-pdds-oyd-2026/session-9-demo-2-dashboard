@@ -47,3 +47,8 @@ variable "monthly_budget_usd" {
   type        = number
   default     = 50
 }
+
+variable "aws_region" {
+  description = "AWS region where the observability resources are created. Used in the CloudWatch dashboard widget region field."
+  type        = string
+}

@@ -25,6 +25,7 @@ module "observability" {
   latency_threshold_seconds   = var.latency_threshold_seconds
   estimated_charges_threshold = var.estimated_charges_threshold
   monthly_budget_usd          = var.monthly_budget_usd
+  aws_region                  = var.aws_region
 
   providers = {
     aws           = aws
